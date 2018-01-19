@@ -2,40 +2,93 @@ pragma solidity ^0.4.19;
 
 contract RockPaperScissors {
     
-    address contractAddress = this;
-    enum Actions {Paper, Scissors, Rock}
-    Actions myaction;
-    mapping(address => uint256) balances;
-    event Transfer(address from, uint value);
-    
-    function depositEtherForEnrolment(uint amount) returns(bool success) {
-     if(balances[msg.sender] < amount) return false;
-       balances[msg.sender] -= amount;
-        if(!contractAddress.send(msg.value)) {
-        balances[msg.sender] += msg.value;      
-            revert();
+  address player1;
+  address player2;
+  uint playerScore1 = 0;
+  uint playerScore2 = 0;
+  uint score;
+  uint[] ids;
+
+  struct PlayersChoice{
+    string playerchoice1;
+    string playerchoice2;
+
+  }
+
+  mapping(uint => PlayersChoice) playersChoices;
+  mapping(uint => uint) scores;
+
+  event LogMakingChoices(string playerchoice1, string playerchoice2);
+  event LogReward(uint playerScore1,  uint playerScore2, uint balance);
+
+  function makeChoice(string playerchoice1, string playerchoice2, uint choiceNumber)
+  returns (bool success){
+     require(bytes(playerchoice1).length != 0);
+     require(bytes(playerchoice2).length != 0);
+     playersChoices[choiceNumber] = PlayersChoice(playerchoice1, playerchoice2);
+     ids.push(choiceNumber);
+     LogMakingChoices(playerchoice1, playerchoice2);
+     return true;
+  }
+
+  function identifyScore(string playerchoice1, string playerchoice2, uint game_id) {
+      require(bytes(playerchoice1).length != 0);
+      require(bytes(playerchoice2).length != 0);
+      require(game_id != uint(0));
+      if(sha3(playerchoice1) == sha3("paper") &&
+        sha3(playerchoice2) == sha3("paper")){
+            scores[game_id] = 0;
         }
-        Transfer(msg.sender, amount);
-        return true;
-    }
-    
-    function setUniqueMove(uint256 value) {
-     require(uint256(Actions.Rock) >= value);
-     myaction = Actions(value);
-    }
-    
-     function getUniqueMove() constant returns (uint256) {
-         return uint256(myaction);
-    }
-    
-    function rewardWinner(address winnerAddress) payable returns(bool success){
-      uint reward = this.balance;
-      balances[winnerAddress] += reward;
-      if(!winnerAddress.send(reward)){
-          balances[winnerAddress] -= reward;
-          revert();
+        if(sha3(playerchoice1) == sha3("rock") &&
+        sha3(playerchoice2) == sha3("rock")){
+           scores[game_id] = 0;
+
+        }
+        if(sha3(playerchoice1) == sha3("scissor") &&
+         sha3(playerchoice2) == sha3("scissor")){
+            scores[game_id] = 0;
+        }
+        if(sha3(playerchoice1) == sha3("rock") &&
+        sha3(playerchoice2) == sha3("paper")){
+            scores[game_id] = 0;
+            playerScore2 = 1;
+        }
+        if(sha3(playerchoice1) == sha3("paper") &&
+        sha3(playerchoice2) == sha3("rock")){
+            scores[game_id] = 0;
+            playerScore1 = 1;
+        }
+        if(sha3(playerchoice1) == sha3("rock") &&
+        sha3(playerchoice2) == sha3("scissors")){
+            scores[game_id] = 0;
+            playerScore1 = 1;
+        }
+        if(sha3(playerchoice1) == sha3("scissors") &&
+        sha3(playerchoice2) == sha3("rock")){
+            scores[game_id] = 0;
+            playerScore2 = 1;
+        }
+        if(sha3(playerchoice1) == sha3("paper") &&
+        sha3(playerchoice2) == sha3("scissors")){
+            scores[game_id] = 0;
+            playerScore1 = 1;
+        }
+        if(sha3(playerchoice1) == sha3("scissors") &&
+        sha3(playerchoice2) == sha3("paper")){
+            scores[game_id] = 0;
+            playerScore2 = 1;
+        }
+  }
+
+  function rewardWinner() payable returns (bool success){
+      if(playerScore1 == 1){
+          player1.send(this.balance);
+      }else if(playerScore2 == 1){
+          player2.send(this.balance);
       }
-        return true;
-    }
- 
-}
+      LogReward(playerScore1, playerScore2, this.balance);
+      playerScore1 = 0;
+      playerScore2 = 0;
+      return true;
+  }
+ }
