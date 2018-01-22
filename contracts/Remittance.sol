@@ -9,11 +9,6 @@ contract Remittance {
     uint public deadline;
 
 
-    struct RemittanceBuilder{
-        uint remittanceAmount;
-        address moneyTransmitterAddress;
-    }
-
     function Remittance(uint durationInMinutes)
         public
         {
@@ -21,13 +16,9 @@ contract Remittance {
             deadline = now + durationInMinutes * 1 minutes;
         }
 
-    mapping(uint => RemittanceBuilder) public remittanceMap;
-
     uint[] ids;
 
     mapping(address => uint) public balances;
-
-    event LogRemittance(address from, address to, uint amount);
 
     event LogWithdrawl(uint sum);
 
@@ -70,58 +61,25 @@ contract Remittance {
 
             amount = msg.value;
 
-            balances[msg.sender] -= msg.value;
-
             return true;
         }
 
 
     function withdraw(
         string beneficiaryPassword,
-        string remitterPassword,
-        address moneyTransmitterAddress)
+        string remitterPassword)
             afterDeadline
             public
             payable
             returns(bool success)
             {
+                require(this.balance > 0);
                 require(beneficiaryHashedPassword == keccak256(beneficiaryPassword));
                 require(remitterHashedPassword == keccak256(remitterPassword));
-                require(moneyTransmitterAddress != 0);
 
-                moneyTransmitterAddress.transfer(amount);
-
-                balances[moneyTransmitterAddress] += amount;
+                msg.sender.transfer(amount);
 
                 LogWithdrawl(amount);
 
                 return true;
             }
-
-
-    function remit(
-        address beneficiaryAddress,
-        address moneyTransmitter,
-        uint id,
-        string beneficiaryPw)
-        public
-        payable
-        returns (bool success){
-            require(beneficiaryAddress != address(0));
-            require(moneyTransmitter != address(0));
-            require(id != uint(0));
-            require(beneficiaryHashedPassword == setBeneficiaryPasswordHash(beneficiaryPw));
-
-            remittanceMap[id] = RemittanceBuilder(amount, moneyTransmitter);
-
-            ids.push(id);
-
-            balances[beneficiaryAddress] += amount;
-            balances[moneyTransmitter] -= amount;
-
-            LogRemittance(moneyTransmitter, beneficiaryAddress, amount);
-
-            return true;
-    }
-
-  }
