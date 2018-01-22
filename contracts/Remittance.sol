@@ -14,7 +14,7 @@ contract Remittance {
         uint remittanceDeadline;
     }
 
-    function Remittance(uint _deadline) payable{
+    function Remittance(uint _deadline) {
         deadline = _deadline;
         owner = msg.sender;
         amount = msg.value;

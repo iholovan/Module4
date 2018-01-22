@@ -12,7 +12,7 @@ contract Splitter {
   event LogSplitSent(address sender, address recipient1, address recipient2, uint amountSent, uint totalAmout);
   event LogGetBalance(address recipient, uint amount);
 
-   function Splitter(address recipient1, address recipient2)  payable {
+   function Splitter(address recipient1, address recipient2) {
       require(recipient1 != 0);
       require(recipient2 != 0);
       recipient1Address = recipient1;
