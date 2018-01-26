@@ -10,7 +10,6 @@ contract Splitter {
   mapping (address => uint) public balances;
 
   event LogSplitSent(address sender, address recipient1, address recipient2, uint amountSent, uint totalAmout);
-  event LogGetBalance(address recipient, uint amount);
 
    function Splitter(
         address recipient1,
@@ -32,10 +31,10 @@ contract Splitter {
     onlyOwner
     payable
     returns(bool success){
-            remainder = msg.value % 2;
+            require(msg.value % 2 == 0);
             amount = msg.value / 2;
-            balances[recipient1Address] += amount + remainder;
-            balances[recipient2Address] += amount;
+            recipient1Address.send(amount);
+            recipient2Address.send(amount);
             LogSplitSent(owner, recipient1Address, recipient2Address, amount, msg.value);
             return true;
     }
