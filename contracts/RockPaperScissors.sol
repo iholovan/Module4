@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.13;
 
 contract RockPaperScissors {
     
@@ -82,9 +82,9 @@ contract RockPaperScissors {
 
   function rewardWinner() payable returns (bool success){
       if(playerScore1 == 1){
-          player1.send(this.balance);
+          player1.transfer(this.balance);
       }else if(playerScore2 == 1){
-          player2.send(this.balance);
+          player2.transfer(this.balance);
       }
       LogReward(playerScore1, playerScore2, this.balance);
       playerScore1 = 0;

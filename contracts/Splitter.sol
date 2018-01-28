@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.13;
 
 contract Splitter {
     
@@ -38,8 +38,8 @@ contract Splitter {
     returns(bool success){
             require(msg.value % 2 == 0);
             amount = msg.value / 2;
-            recipient1Address.send(amount);
-            recipient2Address.send(amount);
+            recipient1Address.transfer(amount);
+            recipient2Address.transfer(amount);
             LogSplitSent(owner, recipient1Address, recipient2Address, amount, msg.value);
             return true;
         }
