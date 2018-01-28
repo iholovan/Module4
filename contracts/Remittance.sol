@@ -7,7 +7,6 @@ contract Remittance {
     uint public amount;
     uint public deadline;
 
-
     function Remittance(uint durationInSeconds)
         public
         {
@@ -35,16 +34,13 @@ contract Remittance {
         address receiver2,
         bytes32 receiver2Password)
         constant
-        private
+        public
         returns(bytes32 hash)
         {
             return keccak256(receiver1, receiver1Password, receiver2, receiver2Password);
         }
 
-    function deposit(address receiver1,
-        bytes32 receiver1Password,
-        address receiver2,
-        bytes32 receiver2Password)
+    function deposit()
         isOwned
         public
         payable
@@ -52,8 +48,6 @@ contract Remittance {
             require(msg.value > 0);
 
             amount = msg.value;
-
-            hashedInfo = hashInfo(receiver1, receiver1Password, receiver2, receiver2Password);
 
             return true;
         }
@@ -69,11 +63,11 @@ contract Remittance {
             returns(bool success)
             {
 
-                require(hashedInfo == hashInfo(beneficiaryAddress, beneficiaryPassword, remitterAddress, remitterPassword));
+                hashedInfo = hashInfo(beneficiaryAddress, beneficiaryPassword, remitterAddress, remitterPassword);
 
                 msg.sender.transfer(amount);
 
-                LogWithdrawl(amount, hashInfo(beneficiaryAddress, beneficiaryPassword, remitterAddress, remitterPassword));
+                LogWithdrawl(amount, hashedInfo);
 
                 return true;
             }
