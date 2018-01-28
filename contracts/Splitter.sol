@@ -4,6 +4,7 @@ contract Splitter {
     
   address public recipient1Address;
   address public recipient2Address;
+  address public owner;
   uint public amount;
   uint remainder;
   mapping (address => uint) public balances;
