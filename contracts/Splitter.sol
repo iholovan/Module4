@@ -4,12 +4,16 @@ contract Splitter {
     
   address public recipient1Address;
   address public recipient2Address;
-  address public owner;
   uint public amount;
   uint remainder;
   mapping (address => uint) public balances;
 
-  event LogSplitSent(address sender, address recipient1, address recipient2, uint amountSent, uint totalAmout);
+  event LogSplitSent(
+  address sender,
+  address recipient1,
+  address recipient2,
+  uint amountSent,
+  uint totalAmout);
 
    function Splitter(
         address recipient1,
@@ -37,5 +41,5 @@ contract Splitter {
             recipient2Address.send(amount);
             LogSplitSent(owner, recipient1Address, recipient2Address, amount, msg.value);
             return true;
-    }
+        }
 }

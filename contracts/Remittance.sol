@@ -2,25 +2,20 @@ pragma solidity 0.4.19;
 
 contract Remittance {
 
-    bytes32 private beneficiaryHashedPassword = 0xd533f44a496ce998e51ca2c0bbe9445fa36bd71ab9d39735f92339b368a617f1;
-    bytes32 private remitterHashedPassword = 0xffae97a8a972adf9bb9c72f22db8d7d687bcf1ed466105c78dccd16ac22d84ca;
+    bytes32 public hashedInfo;
     address public owner;
     uint public amount;
     uint public deadline;
 
 
-    function Remittance(uint durationInMinutes)
+    function Remittance(uint durationInSeconds)
         public
         {
             owner = msg.sender;
-            deadline = now + durationInMinutes * 1 minutes;
+            deadline = durationInSeconds;
         }
 
-    uint[] ids;
-
-    mapping(address => uint) public balances;
-
-    event LogWithdrawl(uint sum);
+    event LogWithdrawl(uint sum, bytes32 hashedInfo);
 
     modifier isOwned()
         {
@@ -34,25 +29,22 @@ contract Remittance {
             _;
         }
 
-    function setBeneficiaryPasswordHash(
-        string beneficiaryPassword)
+    function hashInfo(
+        address receiver1,
+        bytes32 receiver1Password,
+        address receiver2,
+        bytes32 receiver2Password)
+        constant
         private
-        returns (bytes32 hash)
+        returns(bytes32 hash)
         {
-            beneficiaryHashedPassword = keccak256(beneficiaryPassword);
-            return beneficiaryHashedPassword;
+            return keccak256(receiver1, receiver1Password, receiver2, receiver2Password);
         }
 
-    function setRemitterPasswordHash(
-        string remitterPassword)
-        private
-        returns (bytes32 hash)
-        {
-            remitterHashedPassword = keccak256(remitterPassword);
-            return remitterHashedPassword;
-        }
-
-    function deposit()
+    function deposit(address receiver1,
+        bytes32 receiver1Password,
+        address receiver2,
+        bytes32 receiver2Password)
         isOwned
         public
         payable
@@ -61,25 +53,28 @@ contract Remittance {
 
             amount = msg.value;
 
+            hashedInfo = hashInfo(receiver1, receiver1Password, receiver2, receiver2Password);
+
             return true;
         }
 
-
     function withdraw(
-        string beneficiaryPassword,
-        string remitterPassword)
+        address beneficiaryAddress,
+        bytes32 beneficiaryPassword,
+        address remitterAddress,
+        bytes32 remitterPassword)
             afterDeadline
             public
             payable
             returns(bool success)
             {
-                require(this.balance > 0);
-                require(beneficiaryHashedPassword == keccak256(beneficiaryPassword));
-                require(remitterHashedPassword == keccak256(remitterPassword));
+
+                require(hashedInfo == hashInfo(beneficiaryAddress, beneficiaryPassword, remitterAddress, remitterPassword));
 
                 msg.sender.transfer(amount);
 
-                LogWithdrawl(amount);
+                LogWithdrawl(amount, hashInfo(beneficiaryAddress, beneficiaryPassword, remitterAddress, remitterPassword));
 
                 return true;
             }
+}
